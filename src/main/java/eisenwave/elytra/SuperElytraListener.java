@@ -1,9 +1,6 @@
 package eisenwave.elytra;
 
-import org.bukkit.Effect;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Sound;
+import org.bukkit.*;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -49,7 +46,7 @@ public class SuperElytraListener implements Listener {
                 continue;
             }
             int time = playerChargeUpTicksMap.get(player);
-            playerChargeUpTicksMap.put(player, time++);
+            playerChargeUpTicksMap.put(player, ++time);
             
             player.getWorld().spigot().playEffect(player.getLocation(), Effect.PARTICLE_SMOKE, 0, 0, 0.2F, 0.2F, 0.2F, 0.0F, 1, 30);
             if (time % 3 == 0) {
