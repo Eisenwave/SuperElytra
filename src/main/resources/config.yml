@@ -6,3 +6,7 @@ chargeup_time: 60
 # Elytra gliding speed multiplier
 # default = 1.0
 speed_multiplier: 1.0
+
+# True if enhanced flight is to be enabled by default, else false
+# default = true
+default: true

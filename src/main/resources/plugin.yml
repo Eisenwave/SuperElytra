@@ -1,11 +1,20 @@
 name: SuperElytra
 main: eisenwave.elytra.SuperElytraPlugin
-version: 2.0
+version: 2.1
 
 permissions:
   superelytra.glide:
-    description: "allows a player enhanced gliding"
+    description: "enhanced gliding"
     default: true
   superelytra.launch:
-    description: "allows a player to launch themselves by sneaking"
+    description: "launch by sneaking"
     default: true
+  superelytra.command.elytramode:
+    description: "/elytramode"
+    default: true
+
+commands:
+  elytramode:
+    aliases: [elmode]
+    permission: superelytra.command.elytramode
+    description: "changes the personal elytra mode"
