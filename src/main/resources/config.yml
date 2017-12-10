@@ -7,6 +7,10 @@ chargeup_time: 60
 # default = 1.0
 speed_multiplier: 1.0
 
+# Launch strength multiplier
+# default = 1.0
+launch_multiplier: 1.0
+
 # True if enhanced flight is to be enabled by default, else false
 # default = true
 default: true

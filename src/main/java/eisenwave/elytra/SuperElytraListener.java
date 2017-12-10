@@ -20,25 +20,30 @@ public class SuperElytraListener implements Listener {
         PERMISSION_LAUNCH = "superelytra.launch",
         PERMISSION_GLIDE = "superelytra.glide",
         CONFIG_SPEED_MULTIPLIER = "speed_multiplier",
+        CONFIG_LAUNCH_MULTIPLIER = "launch_multiplier",
         CONFIG_CHARGE_UP_TIME = "chargeup_time",
         CONFIG_DEFAULT = "default";
     
     private final static int DEFAULT_CHARGE_UP_TIME = 60;
-    private final static double DEFAULT_SPEED_MULTIPLIER = 1;
-    private final static double BASE_SPEED = 0.05;
+    private final static double
+        DEFAULT_SPEED_MULTIPLIER = 1,
+        DEFAULT_LAUNCH_MULTIPLIER = 1,
+        BASE_SPEED = 0.05,
+        BASE_LAUNCH = 3;
     private final static boolean DEFAULT_DEFAULT = true;
     
     // INSTANCE
     
     private Map<Player, SuperElytraPlayer> playerMap = new WeakHashMap<>();
     
-    private final double speedMultiplier;
+    private final double speed, launchStrength;
     private final int chargeUpTime;
     private final boolean _default;
     
     public SuperElytraListener(SuperElytraPlugin plugin) {
         FileConfiguration config = plugin.getConfig();
-        this.speedMultiplier = config.getDouble(CONFIG_SPEED_MULTIPLIER, DEFAULT_SPEED_MULTIPLIER) * BASE_SPEED;
+        this.speed = config.getDouble(CONFIG_SPEED_MULTIPLIER, DEFAULT_SPEED_MULTIPLIER) * BASE_SPEED;
+        this.launchStrength = config.getDouble(CONFIG_LAUNCH_MULTIPLIER, DEFAULT_LAUNCH_MULTIPLIER) * BASE_LAUNCH;
         this.chargeUpTime = config.getInt(CONFIG_CHARGE_UP_TIME, DEFAULT_CHARGE_UP_TIME);
         this._default = config.getBoolean(CONFIG_DEFAULT, DEFAULT_DEFAULT);
     }
@@ -66,18 +71,22 @@ public class SuperElytraListener implements Listener {
     @SuppressWarnings("deprecation")
     public void onTick() {
         for (Map.Entry<Player, SuperElytraPlayer> entry : playerMap.entrySet()) {
+            Player player = entry.getKey();
             SuperElytraPlayer sePlayer = entry.getValue();
-            if (!sePlayer.isChargingLaunch()) continue;
+            if (!player.isOnGround() || !sePlayer.isChargingLaunch()) continue;
             
             int time = sePlayer.getChargeUpTicks();
             sePlayer.setChargeUpTicks(++time);
             
-            Player player = entry.getKey();
-            player.getWorld().spigot().playEffect(player.getLocation(), Effect.PARTICLE_SMOKE, 0, 0, 0.2F, 0.2F, 0.2F, 0.0F, 1, 30);
+            World.Spigot worldSpigot = player.getWorld().spigot();
+    
+            worldSpigot.playEffect(player.getLocation(), Effect.PARTICLE_SMOKE, 0, 0, 0.2F, 0.2F, 0.2F, 0.0F, 1, 30);
             if (time % 3 == 0) {
                 player.playSound(player.getLocation(), Sound.ENTITY_TNT_PRIMED, 0.1F, 0.1F);
-                if (time >= 60)
+                if (time >= 60) {
+                    worldSpigot.playEffect(player.getLocation(), Effect.FLAME, 0, 0, 0.4F, 0.1F, 0.4F, 0.01F, 1, 0);
                     player.playSound(player.getLocation(), Sound.ENTITY_BAT_TAKEOFF, 0.1F, 0.1F);
+                }
             }
         }
     }
@@ -89,7 +98,7 @@ public class SuperElytraListener implements Listener {
         Player player = event.getPlayer();
         if (player.isGliding() && player.hasPermission(PERMISSION_GLIDE) && getPlayer(player).isEnabled()) {
             Vector unitVector = new Vector(0, player.getLocation().getDirection().getY(), 0);
-            player.setVelocity(player.getVelocity().add(unitVector.multiply(speedMultiplier)));
+            player.setVelocity(player.getVelocity().add(unitVector.multiply(speed)));
         }
     }
     
@@ -97,7 +106,7 @@ public class SuperElytraListener implements Listener {
     @EventHandler(ignoreCancelled = true)
     public void onToggleSneak(PlayerToggleSneakEvent event) {
         Player player = event.getPlayer();
-        if (!player.isOnGround() || !player.hasPermission(PERMISSION_LAUNCH)) return;
+        if (!player.hasPermission(PERMISSION_LAUNCH)) return;
         
         ItemStack chestPlate = player.getEquipment().getChestplate();
         if (chestPlate == null || chestPlate.getType() != Material.ELYTRA)
@@ -112,12 +121,13 @@ public class SuperElytraListener implements Listener {
         else {
             if (getPlayer(player).getChargeUpTicks() >= chargeUpTime) {
                 Location loc = player.getLocation();
-                Vector dir = loc.getDirection().add(new Vector(0, 3, 0));
+                Vector dir = loc.getDirection().add(new Vector(0, launchStrength, 0));
                 
                 player.setVelocity(player.getVelocity().add(dir));
                 loc.getWorld().spigot().playEffect(loc, Effect.CLOUD, 0, 0, 0.5F, 0.5F, 0.5F, 0.0F, 30, 30);
                 player.playSound(loc, Sound.ENTITY_ENDERDRAGON_FLAP, 0.1F, 2.0F);
             }
+            getPlayer(player).setChargeUpTicks(-1);
         }
     }
     
