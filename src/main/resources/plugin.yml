@@ -1,6 +1,7 @@
 name: SuperElytra
 main: eisenwave.elytra.SuperElytraPlugin
-version: 2.2
+version: 2.3
+api-version: 1.13
 
 permissions:
   superelytra.glide:

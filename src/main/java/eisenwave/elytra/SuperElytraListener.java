@@ -78,13 +78,14 @@ public class SuperElytraListener implements Listener {
             int time = sePlayer.getChargeUpTicks();
             sePlayer.setChargeUpTicks(++time);
             
-            World.Spigot worldSpigot = player.getWorld().spigot();
+            Location loc = player.getLocation();
+            World world = player.getWorld();
     
-            worldSpigot.playEffect(player.getLocation(), Effect.PARTICLE_SMOKE, 0, 0, 0.2F, 0.2F, 0.2F, 0.0F, 1, 30);
+            world.spawnParticle(Particle.SMOKE_NORMAL, loc, 1, 0.2F, 0.2F, 0.2F, 0.0F); // radius 30
             if (time % 3 == 0) {
                 player.playSound(player.getLocation(), Sound.ENTITY_TNT_PRIMED, 0.1F, 0.1F);
                 if (time >= 60) {
-                    worldSpigot.playEffect(player.getLocation(), Effect.FLAME, 0, 0, 0.4F, 0.1F, 0.4F, 0.01F, 1, 0);
+                    world.spawnParticle(Particle.FLAME, loc, 1, 0.4F, 0.1F, 0.4F, 0.01F);
                     player.playSound(player.getLocation(), Sound.ENTITY_BAT_TAKEOFF, 0.1F, 0.1F);
                 }
             }
@@ -124,8 +125,8 @@ public class SuperElytraListener implements Listener {
                 Vector dir = loc.getDirection().add(new Vector(0, launchStrength, 0));
                 
                 player.setVelocity(player.getVelocity().add(dir));
-                loc.getWorld().spigot().playEffect(loc, Effect.CLOUD, 0, 0, 0.5F, 0.5F, 0.5F, 0.0F, 30, 30);
-                player.playSound(loc, Sound.ENTITY_ENDERDRAGON_FLAP, 0.1F, 2.0F);
+                loc.getWorld().spawnParticle(Particle.CLOUD, loc, 30, 0.5F, 0.5F, 0.5F, 0.0F);
+                player.playSound(loc, Sound.ENTITY_ENDER_DRAGON_FLAP, 0.1F, 2.0F);
             }
             getPlayer(player).setChargeUpTicks(-1);
         }
